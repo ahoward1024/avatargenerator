@@ -1,0 +1,23 @@
+# What I want:
+	# .dll, .lib, .cpp, .c, .h, .bat, /res
+# What I don't want:
+	# .exe, .ilk, .pdb, .suo, .sdf, .sdl, .obj, Visual Studio folders, Sublime workspace
+
+# Visual Studio nonsense
+*.exe
+*.ilk
+*.pdb
+*.suo
+*.sdf
+*.sln
+*.obj
+*.opendb
+*.db
+\.vs
+\Debug
+
+# Linux nonsense
+*.out
+
+# My nonsense
+*.sublime-workspace
