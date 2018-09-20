@@ -15,6 +15,6 @@ Enjoy!
 ![my_output_file](./res/examples/my_output_file.png)
 ![my_dude](./res/examples/my_dude.png)
 
-![Program Example 1](./res/examples/program_example_1.png)
-![Program Example 2](./res/examples/program_example_2.png)
-![Program Example 3](./res/examples/program_example_3.png)
+![Program Example 1](./res/examples/program_example_1.PNG)
+![Program Example 2](./res/examples/program_example_2.PNG)
+![Program Example 3](./res/examples/program_example_3.PNG)
