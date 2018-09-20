@@ -317,6 +317,21 @@ void FreeFontList(TTF_Font **fontlist)
   free(fontlist);
 }
 
+void UseGoogleColors(char* gcolorbutton_name, const char* gc_str, const char *type, ImVec4* color)
+{
+  for(int i = 0; i < Google_Colors.size; ++i)
+  {
+    strcpy(gcolorbutton_name, "");
+    char num[4];
+    snprintf(num, 4, "%d", i);
+    snprintf(gcolorbutton_name, 20, "%s%s%s", gc_str, num, type);
+    ImGui::PushStyleColor(ImGuiCol_Button, Google_Colors.colors[i]);
+    if(ImGui::Button(gcolorbutton_name)) *color = ImGui::ColorConvertU32ToFloat4(Google_Colors.colors[i]);
+    if(i != Google_Colors.size - 1) ImGui::SameLine();
+    ImGui::PopStyleColor(1);
+  }
+}
+
 void HandleEvents(SDL_Window *window)
 {
   SDL_GetWindowSize(window, &G_WindowW, &G_WindowH);
@@ -457,31 +472,42 @@ int main(int argc, char **argv)
     {
       ImDrawList *draw_list = ImGui::GetWindowDrawList();
       static int size = 145;
+
       ImGui::SliderInt("Font Size", &size, 16, FONTLIST_COUNT - 1);
-      ImGui::InputText("Contact Name", contact_name, CONTACT_SIZE);
-      static bool usegcolors = false;
-      ImGui::Checkbox("Use Google Colors", &usegcolors);
-      if(usegcolors)
-      {
-        for(int i = 0; i < Google_Colors.size; ++i)
-        {
-          strcpy(gcolorbutton_name, "");
-          char num[4];
-          snprintf(num, 4, "%d", i);
-          snprintf(gcolorbutton_name, 20, "%s%s", gc_str, num);
-          ImGui::PushStyleColor(ImGuiCol_Button, Google_Colors.colors[i]);
-          if(ImGui::Button(gcolorbutton_name)) circle_color = ImGui::ColorConvertU32ToFloat4(Google_Colors.colors[i]);
-          if(i != Google_Colors.size - 1) ImGui::SameLine();
-          ImGui::PopStyleColor(1);
-        }
+
+      static bool use_contact_name = true;
+      ImGui::Checkbox("Use contact name for filename?", &use_contact_name);
+      static char filename_save[CONTACT_SIZE];
+      if(!use_contact_name) {
+        ImGui::InputText("File name", filename_save, CONTACT_SIZE);
       }
-      else
-      {
-        ImGui::ColorEdit3("Circle", &circle_color.x); ImGui::SameLine();
+
+      ImGui::InputText("Contact Name", contact_name, CONTACT_SIZE);
+
+      ImGui::Text("Circle Color: ");
+      ImGui::SameLine();
+      static bool usegcolors_circle = false;
+      ImGui::Checkbox("Use Google Colors##Circle", &usegcolors_circle);
+      ImGui::SameLine();
+      if(usegcolors_circle) {
+        UseGoogleColors(gcolorbutton_name, "   ##circle", gc_str, &circle_color);
+      } else {
+        ImGui::ColorEdit3("##circlecolor3", &circle_color.x); ImGui::SameLine();
         if(ImGui::Button("Reset##circle")) circle_color = ImGui::ColorConvertU32ToFloat4(original_circle_color);
       }
-      ImGui::ColorEdit3("Text  ", &text_color.x); ImGui::SameLine();
-      if(ImGui::Button("Reset##text")) text_color = ImGui::ColorConvertU32ToFloat4(original_text_color);
+
+      ImGui::Text("Text Color:   ");
+      ImGui::SameLine();
+      static bool usegcolor_text;
+      ImGui::Checkbox("Use Google Colors##Text", &usegcolor_text);
+      ImGui::SameLine();
+      if(usegcolor_text) {
+        UseGoogleColors(gcolorbutton_name, "   ##text", gc_str, &text_color);
+      } else {
+        ImGui::ColorEdit3("##textcolor3", &text_color.x); ImGui::SameLine();
+        if(ImGui::Button("Reset##text")) text_color = ImGui::ColorConvertU32ToFloat4(original_text_color);
+      }
+
       static bool show_debug_lines = false;
       ImGui::Checkbox("Show lines", &show_debug_lines);
       if(ImGui::Button("Save"))
@@ -498,7 +524,8 @@ int main(int argc, char **argv)
           char *output_filename = (char *)calloc(size, sizeof(char));
           output_filename[size - 1] = '\0';
           strcat(output_filename, "out/");
-          strcat(output_filename, contact_name);
+          if(use_contact_name) strcat(output_filename, contact_name);
+          else strcat(output_filename, filename_save);
           strcat(output_filename, ".png");
           // NOTE: Win32, blech
           if(CreateDirectory("out", NULL) || ERROR_ALREADY_EXISTS == GetLastError())
@@ -543,6 +570,7 @@ int main(int argc, char **argv)
           SDL_FreeSurface(output_surface);
         }
       }
+      ImGui::TextColored(ImVec4(0xFF, 0x00, 0x00, 0xFF),"(Warning! Will overwrite any file with the same name!)");
       SDL_Color t_color = {(uint8_t)(text_color.z * 0xFF), (uint8_t)(text_color.y * 0xFF), (uint8_t)(text_color.x * 0xFF), (uint8_t)(text_color.w * 0xFF)};
       UpdateText(&text, fontlist_roboto[size], t_color, contact_name);
       draw_list->AddRectFilled(ImVec2((G_WindowW / 2) - (circle->w / 2) + 5, (G_WindowH / 2) - (circle->h / 2) - 5), ImVec2((G_WindowW / 2) + (circle->w / 2) - 5, (G_WindowH / 2) + (circle->h / 2) + 5), ImColor(ImVec4(1.0f, 1.0f, 1.0f, 0.03f)));

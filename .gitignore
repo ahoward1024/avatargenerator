@@ -21,3 +21,6 @@
 
 # My nonsense
 *.sublime-workspace
+
+# File output
+/bin/out
